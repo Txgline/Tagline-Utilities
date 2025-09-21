@@ -152,7 +152,7 @@ app.post('/donation', async (req, res) => {
         const channel = await client.channels.fetch('1273828770884620438');
 
         const robuxEmojiMessage = "<:robux:1206541048063459348>";
-        const content = `${emoji || ""} \`${donator.username}\` just donated ${robuxEmojiMessage} **${amount.toLocaleString()} Robux** to \`${receiver.username}\``;
+        const content = `${emoji || ""} \`${donator.username}\` just donated ${robuxEmojiMessage}**${amount.toLocaleString()} Robux** to \`${receiver.username}\``;
 
         const embed = new EmbedBuilder()
             .setImage('attachment://donation.png')
