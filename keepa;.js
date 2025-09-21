@@ -53,9 +53,9 @@ async function generateDonationCard({ donator, receiver, amount, color, robuxEmo
     const donatorAvatar = await loadRobloxAvatar(donator.id);
     const receiverAvatar = await loadRobloxAvatar(receiver.id);
 
-    // --- Adjusted sizes ---
-    const circleRadius = 80; // smaller circle
-    const avatarY = height / 2;
+    // --- Avatar settings ---
+    const circleRadius = 80;
+    const avatarY = height * 0.75;
     const donatorX = width * 0.15;
     const receiverX = width * 0.85;
 
@@ -75,29 +75,33 @@ async function generateDonationCard({ donator, receiver, amount, color, robuxEmo
         ctx.stroke();
     });
 
-    // Robux emoji in center
+    // --- Robux emoji + amount ---
+    ctx.font = 'bold 90px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = dynamicColor;
+
+    const robuxEmojiSize = 70;
     if (robuxEmojiUrl) {
         try {
             const emojiImage = await loadImage(robuxEmojiUrl);
-            const emojiSize = 90; // make emoji bigger
-            ctx.drawImage(emojiImage, width / 2 - emojiSize / 2, avatarY - emojiSize / 2 - 10, emojiSize, emojiSize);
+            ctx.drawImage(emojiImage, width / 2 - 150, height * 0.3 - robuxEmojiSize / 2, robuxEmojiSize, robuxEmojiSize);
         } catch (err) {
             console.warn("Failed to load Robux emoji:", err.message);
         }
     }
 
-    // Draw Robux amount bigger
-    ctx.font = 'bold 90px sans-serif'; // bigger font
-    ctx.fillStyle = dynamicColor;
-    ctx.textAlign = 'center';
-    ctx.fillText(`${amount.toLocaleString()}`, width / 2, avatarY + 120);
+    ctx.fillText(`${amount.toLocaleString()}`, width / 2 + 50, height * 0.35); // slightly right of emoji
 
-    // Draw usernames under avatars, bigger
+    // --- "donated to" text ---
+    ctx.font = 'bold 50px sans-serif';
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillText('donated to', width / 2, height * 0.45);
+
+    // --- Usernames under avatars ---
     ctx.font = 'bold 45px sans-serif';
     ctx.fillStyle = '#FFFFFF';
-    ctx.textAlign = 'center';
-    ctx.fillText(`@${donator.username}`, donatorX, avatarY + circleRadius + 60);
-    ctx.fillText(`@${receiver.username}`, receiverX, avatarY + circleRadius + 60);
+    ctx.fillText(`@${donator.username}`, donatorX, avatarY + circleRadius + 50);
+    ctx.fillText(`@${receiver.username}`, receiverX, avatarY + circleRadius + 50);
 
     return canvas.toBuffer('image/png');
 }
