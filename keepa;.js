@@ -144,7 +144,7 @@ app.post('/donation', async (req, res) => {
         if (!donator?.id || !receiver?.id || typeof amount !== 'number')
             return res.status(400).json({ error: 'Invalid payload' });
 
-        const robuxEmojiUrl = "https://cdn.discordapp.com/emojis/1206541048063459348.webp?size=96";
+        const robuxEmojiUrl = "https://cdn.discordapp.com/emojis/1206541048063459348.png";
 
         const buffer = await generateDonationCard({ donator, receiver, amount, color, robuxEmojiUrl });
         const attachment = new AttachmentBuilder(buffer, { name: 'donation.png' });
@@ -152,12 +152,12 @@ app.post('/donation', async (req, res) => {
         const channel = await client.channels.fetch('1273828770884620438');
 
         const robuxEmojiMessage = "<:robux:1206541048063459348>";
-        const content = `${emoji || ""} \`${donator.username}\` just donated ${robuxEmojiMessage}**${amount.toLocaleString()} Robux** to \`${receiver.username}\``;
+        const content = `${emoji || ""} \`${donator.username}\` just donated ${robuxEmojiMessage} **${amount.toLocaleString()} Robux** to \`${receiver.username}\``;
 
         const embed = new EmbedBuilder()
             .setImage('attachment://donation.png')
             .setColor(color ? parseInt(color.replace('#', ''), 16) : 0x00bdff)
-            .setFooter('Donated on')
+            .setFooter({ text: 'Donated on' })
             .setTimestamp();
 
         await channel.send({ content, embeds: [embed], files: [attachment] });
@@ -168,6 +168,7 @@ app.post('/donation', async (req, res) => {
         res.status(500).json({ error: 'failed' });
     }
 });
+
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
