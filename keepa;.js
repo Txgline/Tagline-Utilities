@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const { createCanvas, loadImage } = require('canvas');
+const { createCanvas, loadImage, registerFont } = require('canvas');
 const fetch = require('node-fetch');
 const { Client, EmbedBuilder, AttachmentBuilder } = require('discord.js');
 
@@ -9,33 +9,10 @@ client.login(process.env.TOKEN);
 
 const app = express();
 app.use(bodyParser.json());
-
-const { createCanvas, loadImage } = require('canvas');
 const fetch = require('node-fetch');
 
-async function loadRobloxAvatar(userId) {
-    try {
-        const apiUrl = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=420x420&format=Png&isCircular=false`;
-        const res = await fetch(apiUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } });
-        const json = await res.json();
-        const imageUrl = json.data?.[0]?.imageUrl;
-        if (!imageUrl) throw new Error('No imageUrl found');
-        const imgRes = await fetch(imageUrl);
-        const buffer = await imgRes.arrayBuffer();
-        return await loadImage(Buffer.from(buffer));
-    } catch {
-        return await loadImage('https://i.imgur.com/0PqOKSA.png'); // fallback avatar
-    }
-}
-
-function getColorFromAmount(amount) {
-    if (amount >= 10000000) return '#FB0505';
-    if (amount >= 1000000) return '#ff0064';
-    if (amount >= 100000) return '#ff00e6';
-    if (amount >= 10000) return '#00b3ff';
-    if (amount >= 1) return '#08ff24';
-    return '#00bdff';
-}
+registerFont('./fonts/NotoSans-Regular.ttf', { family: 'NotoSans' });
+registerFont('./fonts/NotoColorEmoji.ttf', { family: 'NotoEmoji' }); // optional if using emojis
 
 async function generateDonationCard({ donator, receiver, amount, color, robuxEmojiUrl }) {
     const width = 1200;
@@ -45,20 +22,19 @@ async function generateDonationCard({ donator, receiver, amount, color, robuxEmo
 
     const dynamicColor = color || getColorFromAmount(amount);
 
-    // Transparent background
-    ctx.clearRect(0, 0, width, height);
+    ctx.clearRect(0, 0, width, height); // transparent background
 
     // Load avatars
     const donatorAvatar = await loadRobloxAvatar(donator.id);
     const receiverAvatar = await loadRobloxAvatar(receiver.id);
 
+    // Draw avatars with circular clipping & borders (same as before)
     const circleRadius = 100;
     const avatarY = height / 2;
     const donatorX = width * 0.15;
     const receiverX = width * 0.85;
 
-    // Draw circular avatars with colored borders
-    [ [donatorAvatar, donatorX], [receiverAvatar, receiverX] ].forEach(([avatar, x]) => {
+    [[donatorAvatar, donatorX], [receiverAvatar, receiverX]].forEach(([avatar, x]) => {
         ctx.save();
         ctx.beginPath();
         ctx.arc(x, avatarY, circleRadius, 0, Math.PI * 2);
@@ -73,8 +49,8 @@ async function generateDonationCard({ donator, receiver, amount, color, robuxEmo
         ctx.stroke();
     });
 
-    // Draw Robux amount with custom emoji
-    ctx.font = 'bold 80px sans-serif';
+    // Draw Robux amount on card with custom emoji
+    ctx.font = 'bold 80px NotoSans'; // use registered font
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = dynamicColor;
@@ -93,16 +69,16 @@ async function generateDonationCard({ donator, receiver, amount, color, robuxEmo
     ctx.fillText(`R$ ${amount.toLocaleString()}`, width / 2 + emojiWidth / 2, height * 0.4);
 
     // "donated to" text
-    ctx.font = '50px sans-serif';
+    ctx.font = '50px NotoSans';
     ctx.fillStyle = '#FFFFFF';
     ctx.fillText('donated to', width / 2, height * 0.55);
 
     // Donator & receiver names
-    ctx.font = '35px sans-serif';
+    ctx.font = '35px NotoSans';
     ctx.fillText(`@${donator.username}`, donatorX, avatarY + circleRadius + 50);
     ctx.fillText(`@${receiver.username}`, receiverX, avatarY + circleRadius + 50);
 
-    return canvas.toBuffer('image/png'); // PNG supports transparency
+    return canvas.toBuffer('image/png');
 }
 
 module.exports = { generateDonationCard };
