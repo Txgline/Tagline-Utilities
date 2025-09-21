@@ -21,12 +21,11 @@ async function loadRobloxAvatar(userId) {
         const buffer = await imgRes.arrayBuffer();
         return await loadImage(Buffer.from(buffer));
     } catch {
-        // fallback avatar
         return await loadImage('https://i.imgur.com/0PqOKSA.png');
     }
 }
 
-// Determine border color from Robux amount
+// Get border color
 function getColorFromAmount(amount) {
     if (amount >= 10000000) return '#FB0505';
     if (amount >= 1000000) return '#ff0064';
@@ -36,7 +35,7 @@ function getColorFromAmount(amount) {
     return '#00bdff';
 }
 
-// Generate donation card
+// Generate donation card with perfectly centered Robux emoji
 async function generateDonationCard({ donator, receiver, amount, color, robuxEmojiUrl }) {
     const width = 1200;
     const height = 400;
@@ -57,7 +56,7 @@ async function generateDonationCard({ donator, receiver, amount, color, robuxEmo
     const donatorX = width * 0.15;
     const receiverX = width * 0.85;
 
-    // Draw circular avatars and colored borders
+    // Draw avatars + colored borders
     [[donatorAvatar, donatorX], [receiverAvatar, receiverX]].forEach(([avatar, x]) => {
         ctx.save();
         ctx.beginPath();
@@ -73,36 +72,18 @@ async function generateDonationCard({ donator, receiver, amount, color, robuxEmo
         ctx.stroke();
     });
 
-    // Draw Robux amount with optional custom emoji
-    ctx.font = 'bold 80px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = dynamicColor;
-
-    let emojiWidth = 0;
+    // Draw Robux emoji perfectly centered
     if (robuxEmojiUrl) {
         try {
             const emojiImage = await loadImage(robuxEmojiUrl);
-            emojiWidth = 60; // size of emoji
-            ctx.drawImage(emojiImage, width / 2 - 150, height * 0.35 - 30, emojiWidth, emojiWidth);
+            const emojiSize = 80; // size of emoji
+            ctx.drawImage(emojiImage, width / 2 - emojiSize / 2, avatarY - emojiSize / 2, emojiSize, emojiSize);
         } catch (err) {
             console.warn("Failed to load Robux emoji:", err.message);
         }
     }
 
-    ctx.fillText(`R$ ${amount.toLocaleString()}`, width / 2 + emojiWidth / 2, height * 0.4);
-
-    // "donated to" text
-    ctx.font = '50px sans-serif';
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillText('donated to', width / 2, height * 0.55);
-
-    // Donator & receiver names
-    ctx.font = '35px sans-serif';
-    ctx.fillText(`@${donator.username}`, donatorX, avatarY + circleRadius + 50);
-    ctx.fillText(`@${receiver.username}`, receiverX, avatarY + circleRadius + 50);
-
-    return canvas.toBuffer('image/png'); // PNG supports transparency
+    return canvas.toBuffer('image/png');
 }
 
 module.exports = { generateDonationCard };
@@ -146,29 +127,29 @@ app.post("/log", async (req, res) => {
 
 app.post('/donation', async (req, res) => {
     try {
-        const { donator, receiver, amount, color, emoji } = req.body; // emoji from Roblox
+        const { donator, receiver, amount, color, emoji } = req.body;
 
-        // Validate payload
-        if (!donator || !donator.id) return res.status(400).json({ error: "Missing donator.id" });
-        if (!receiver || !receiver.id) return res.status(400).json({ error: "Missing receiver.id" });
-        if (typeof amount !== "number") return res.status(400).json({ error: "Invalid amount" });
+        if (!donator?.id || !receiver?.id || typeof amount !== 'number')
+            return res.status(400).json({ error: 'Invalid payload' });
 
-        // Robux custom emoji URL
         const robuxEmojiUrl = "https://cdn.discordapp.com/emojis/1206541048063459348.webp?size=96";
 
+        // Generate card image (without any text, only avatars + borders + Robux emoji)
         const buffer = await generateDonationCard({ donator, receiver, amount, color, robuxEmojiUrl });
         const attachment = new AttachmentBuilder(buffer, { name: 'donation.png' });
 
         const channel = await client.channels.fetch('1273828770884620438');
 
-        // Robux custom emoji for message content (Discord emoji format)
+        // Message content with emojis, usernames in backticks, bold Robux amount
         const robuxEmojiMessage = "<:robux:1206541048063459348>";
+        const content = `${emoji || ""} \`${donator.username}\` just donated ${robuxEmojiMessage} **R$ ${amount.toLocaleString()}** to \`${receiver.username}\`!`;
 
-        // Send message: Roblox emoji at start + bold Robux amount + backticks for usernames
-        await channel.send({
-            content: `${emoji || ""} \`${donator.username}\` just donated ${robuxEmojiMessage}**${amount.toLocaleString()}** to \`${receiver.username}\`!`,
-            files: [attachment]
-        });
+        // Send embed with only the image
+        const embed = new EmbedBuilder()
+            .setImage('attachment://donation.png')
+            .setColor(color ? parseInt(color.replace('#', ''), 16) : 0x00bdff);
+
+        await channel.send({ content, embeds: [embed], files: [attachment] });
 
         res.json({ status: 'ok' });
     } catch (err) {
