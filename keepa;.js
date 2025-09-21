@@ -153,15 +153,23 @@ app.post("/log", async (req, res) => {
 
 app.post('/donation', async (req, res) => {
     try {
-        const { donator, receiver, amount } = req.body;
+        const { donator, receiver, amount, color } = req.body;
 
-        const buffer = await generateDonationCard(donator, receiver, amount);
+        // Validate payload
+        if (!donator || !donator.id) return res.status(400).json({ error: "Missing donator.id" });
+        if (!receiver || !receiver.id) return res.status(400).json({ error: "Missing receiver.id" });
+        if (typeof amount !== "number") return res.status(400).json({ error: "Invalid amount" });
+
+        // Generate the donation card
+        const buffer = await generateDonationCard({ donator, receiver, amount, color });
         const attachment = new AttachmentBuilder(buffer, { name: 'donation.png' });
 
-        const embed = new EmbedBuilder()
-            .setTitle('New Donation!')
-            .setDescription(`${donator.username} just donated ${amount.toLocaleString()} Robux to ${receiver.username}!`)
-            .setImage('attachment://donation.png');
+        const embed = {
+            title: 'New Donation!',
+            description: `${donator.username} just donated R$ ${amount.toLocaleString()} to ${receiver.username}!`,
+            image: { url: 'attachment://donation.png' },
+            color: color ? parseInt(color.replace('#', ''), 16) : 0x00bdff
+        };
 
         const channel = await client.channels.fetch('1273828770884620438');
         await channel.send({ embeds: [embed], files: [attachment] });
@@ -172,6 +180,7 @@ app.post('/donation', async (req, res) => {
         res.status(500).json({ error: 'failed' });
     }
 });
+
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
