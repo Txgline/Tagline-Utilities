@@ -12,103 +12,107 @@ app.use(bodyParser.json());
 
 async function loadRobloxAvatar(userId) {
     try {
-        // Fetch avatar headshot JSON
         const apiUrl = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=420x420&format=Png&isCircular=false`;
         const res = await fetch(apiUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } });
         if (!res.ok) throw new Error(`Failed to fetch avatar JSON: ${res.status}`);
-        
         const json = await res.json();
         const imageUrl = json.data?.[0]?.imageUrl;
-        if (!imageUrl) throw new Error('No imageUrl found in response');
+        if (!imageUrl) throw new Error('No imageUrl found');
 
-        // Fetch the actual image as buffer
-        const imageRes = await fetch(imageUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } });
-        const buffer = await imageRes.arrayBuffer();
-
+        const imgRes = await fetch(imageUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+        const buffer = await imgRes.arrayBuffer();
         return await loadImage(Buffer.from(buffer));
     } catch {
-        // Fallback image if Roblox API fails
-        return await loadImage('https://i.imgur.com/0PqOKSA.png');
+        return await loadImage('https://i.imgur.com/0PqOKSA.png'); // fallback avatar
     }
 }
 
-async function generateDonationCard({
-    donatorProfileId,
-    raiserProfileId,
-    donatorName,
-    raiserName,
-    robuxAmount,
-    primaryColor
-}) {
+// Node function to determine color from Robux amount
+function getColorFromAmount(amount) {
+    if (amount >= 10000000) return '#FB0505';
+    if (amount >= 1000000) return '#ff0064';
+    if (amount >= 100000) return '#ff00e6';
+    if (amount >= 10000) return '#00b3ff';
+    if (amount >= 1) return '#08ff24';
+    return '#00bdff'; // default
+}
+
+// Main donation card generator
+async function generateDonationCard({ donator, receiver, amount, color }) {
     const width = 1200;
     const height = 400;
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext('2d');
 
-    // Sanitize color
-    const cleanColor = (primaryColor || 'FF00FF').replace('#', '');
-    const dynamicColor = `#${cleanColor}`;
+    // Use custom color if provided, otherwise calculate from amount
+    const dynamicColor = color || getColorFromAmount(amount);
 
     // Background
     ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, width, height);
 
     // Load avatars
-    const donatorAvatar = await loadRobloxAvatar(donatorProfileId);
-    const raiserAvatar = await loadRobloxAvatar(raiserProfileId);
+    const donatorAvatar = await loadRobloxAvatar(donator.id);
+    const receiverAvatar = await loadRobloxAvatar(receiver.id);
 
     const circleRadius = 100;
     const avatarY = height / 2;
-    const donatorAvatarX = width * 0.15;
-    const raiserAvatarX = width * 0.85;
+    const donatorX = width * 0.15;
+    const receiverX = width * 0.85;
 
-    // Draw Donator Avatar in circle
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(donatorAvatarX, avatarY, circleRadius, 0, Math.PI * 2);
-    ctx.clip();
-    ctx.drawImage(donatorAvatar, donatorAvatarX - circleRadius, avatarY - circleRadius, circleRadius * 2, circleRadius * 2);
-    ctx.restore();
+    // Draw circular avatars
+    [ [donatorAvatar, donatorX], [receiverAvatar, receiverX] ].forEach(([avatar, x]) => {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(x, avatarY, circleRadius, 0, Math.PI * 2);
+        ctx.clip();
+        ctx.drawImage(avatar, x - circleRadius, avatarY - circleRadius, circleRadius * 2, circleRadius * 2);
+        ctx.restore();
 
-    // Draw Raiser Avatar in circle
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(raiserAvatarX, avatarY, circleRadius, 0, Math.PI * 2);
-    ctx.clip();
-    ctx.drawImage(raiserAvatar, raiserAvatarX - circleRadius, avatarY - circleRadius, circleRadius * 2, circleRadius * 2);
-    ctx.restore();
-
-    // Draw circles around avatars
-    ctx.strokeStyle = dynamicColor;
-    ctx.lineWidth = 8;
-    ctx.beginPath();
-    ctx.arc(donatorAvatarX, avatarY, circleRadius + 4, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(raiserAvatarX, avatarY, circleRadius + 4, 0, Math.PI * 2);
-    ctx.stroke();
+        // Circle border
+        ctx.strokeStyle = dynamicColor;
+        ctx.lineWidth = 8;
+        ctx.beginPath();
+        ctx.arc(x, avatarY, circleRadius + 4, 0, Math.PI * 2);
+        ctx.stroke();
+    });
 
     // Robux amount text
     ctx.font = 'bold 80px sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = dynamicColor;
-    ctx.fillText(`R$ ${robuxAmount.toLocaleString()}`, width / 2, height * 0.4);
+    ctx.fillText(`R$ ${amount.toLocaleString()}`, width / 2, height * 0.4);
 
     // "donated to" text
     ctx.font = '50px sans-serif';
     ctx.fillStyle = '#FFFFFF';
     ctx.fillText('donated to', width / 2, height * 0.55);
 
-    // Donator & Raiser names
+    // Donator & receiver names
     ctx.font = '35px sans-serif';
-    ctx.fillText(`@${donatorName}`, donatorAvatarX, avatarY + circleRadius + 50);
-    ctx.fillText(`@${raiserName}`, raiserAvatarX, avatarY + circleRadius + 50);
+    ctx.fillText(`@${donator.username}`, donatorX, avatarY + circleRadius + 50);
+    ctx.fillText(`@${receiver.username}`, receiverX, avatarY + circleRadius + 50);
 
     return canvas.toBuffer('image/png');
 }
 
-module.exports = generateDonationCard;
+// Example usage with Discord.js
+async function sendDonationEmbed(channel, donator, receiver, amount, color) {
+    const buffer = await generateDonationCard({ donator, receiver, amount, color });
+    const attachment = new AttachmentBuilder(buffer, { name: 'donation.png' });
+
+    const embed = {
+        title: 'New Donation!',
+        description: `${donator.username} just donated R$ ${amount.toLocaleString()} to ${receiver.username}!`,
+        image: { url: 'attachment://donation.png' },
+        color: color ? parseInt(color.replace('#', ''), 16) : 0x00bdff
+    };
+
+    await channel.send({ embeds: [embed], files: [attachment] });
+}
+
+module.exports = { generateDonationCard, sendDonationEmbed };
 
 app.post("/log", async (req, res) => {
   try {
