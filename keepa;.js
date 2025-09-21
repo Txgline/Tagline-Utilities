@@ -10,8 +10,22 @@ client.login(process.env.TOKEN);
 const app = express();
 app.use(bodyParser.json());
 
+async function loadRobloxAvatar(userId) {
+    const url = `https://www.roblox.com/headshot-thumbnail/image?userId=${userId}&width=150&height=150&format=png`;
+    try {
+        const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+        if (!res.ok) throw new Error(`Failed to fetch avatar: ${res.status}`);
+        const buffer = await res.arrayBuffer();
+        return await loadImage(Buffer.from(buffer));
+    } catch {
+        // Fallback image if Roblox headshot fails
+        return await loadImage('https://www.crusecom.com/wp-content/uploads/2016/12/ceocrusecom-com.jpeg');
+    }
+}
+
 async function generateDonationCard(donator, receiver, amount) {
-    const width = 800, height = 300;
+    const width = 800;
+    const height = 300;
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext('2d');
 
@@ -25,13 +39,9 @@ async function generateDonationCard(donator, receiver, amount) {
     ctx.fillStyle = bgColor;
     ctx.fillRect(0, 0, width, height);
 
-    // Download avatars
-    const donatorAvatar = await loadImage(fetch(`https://www.roblox.com/headshot-thumbnail/image?userId=${donator.id}&width=150&height=150&format=png`, {
-    headers: { 'User-Agent': 'Mozilla/5.0' }
-}).then(res => res.buffer()));
-const receiverAvatar = await loadImage(fetch(`https://www.roblox.com/headshot-thumbnail/image?userId=${receiver.id}&width=150&height=150&format=png`, {
-    headers: { 'User-Agent': 'Mozilla/5.0' }
-}).then(res => res.buffer()));
+    // Load avatars with fallback
+    const donatorAvatar = await loadRobloxAvatar(donator.id);
+    const receiverAvatar = await loadRobloxAvatar(receiver.id);
     ctx.drawImage(donatorAvatar, 50, 75, 150, 150);
     ctx.drawImage(receiverAvatar, 600, 75, 150, 150);
 
@@ -46,6 +56,8 @@ const receiverAvatar = await loadImage(fetch(`https://www.roblox.com/headshot-th
 
     return canvas.toBuffer();
 }
+
+module.exports = generateDonationCard;
 
 app.post("/log", async (req, res) => {
   try {
