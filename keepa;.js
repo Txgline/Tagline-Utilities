@@ -9,6 +9,7 @@ client.login(process.env.TOKEN);
 const app = express();
 app.use(bodyParser.json());
 const fetch = require('node-fetch');
+app.get('/', (req, res) => { res.send("I'm alive"); });
 
 registerFont('./fonts/NotoSans-Regular.ttf', { family: 'NotoSans' });
 
