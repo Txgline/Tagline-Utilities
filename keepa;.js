@@ -46,20 +46,13 @@ async function generateDonationCard({ donator, receiver, amount, color, robuxEmo
 
     const dynamicColor = color || getColorFromAmount(amount);
 
-    // Transparent background
     ctx.clearRect(0, 0, width, height);
-
-    // Load avatars
     const donatorAvatar = await loadRobloxAvatar(donator.id);
     const receiverAvatar = await loadRobloxAvatar(receiver.id);
-
-    // --- Avatar settings ---
     const circleRadius = 80;
     const avatarY = height * 0.75;
     const donatorX = width * 0.15;
     const receiverX = width * 0.85;
-
-    // Draw avatars + circular clip + border
     [[donatorAvatar, donatorX], [receiverAvatar, receiverX]].forEach(([avatar, x]) => {
         ctx.save();
         ctx.beginPath();
@@ -74,8 +67,6 @@ async function generateDonationCard({ donator, receiver, amount, color, robuxEmo
         ctx.arc(x, avatarY, circleRadius + 4, 0, Math.PI * 2);
         ctx.stroke();
     });
-
-    // --- Robux emoji + amount ---
     ctx.font = 'bold 90px sans-serif';
     ctx.textAlign = 'center';
     ctx.fillStyle = dynamicColor;
@@ -91,13 +82,9 @@ async function generateDonationCard({ donator, receiver, amount, color, robuxEmo
     }
 
     ctx.fillText(`${amount.toLocaleString()}`, width / 2 + 50, height * 0.35); // slightly right of emoji
-
-    // --- "donated to" text ---
     ctx.font = 'bold 50px sans-serif';
     ctx.fillStyle = '#FFFFFF';
     ctx.fillText('donated to', width / 2, height * 0.45);
-
-    // --- Usernames under avatars ---
     ctx.font = 'bold 45px sans-serif';
     ctx.fillStyle = '#FFFFFF';
     ctx.fillText(`@${donator.username}`, donatorX, avatarY + circleRadius + 50);
@@ -159,7 +146,7 @@ app.post('/donation', async (req, res) => {
         const channel = await client.channels.fetch('1273828770884620438');
 
         const robuxEmojiMessage = "<:robux:1206541048063459348>";
-        const content = `${emoji || ""} \`${donator.username}\` just donated ${robuxEmojiMessage}**${amount.toLocaleString()} Robux** to \`${receiver.username}\``;
+        const content = `${emoji || ""} \`@${donator.username}\` just donated ${robuxEmojiMessage}**${amount.toLocaleString()} Robux** to \`@${receiver.username}\``;
 
         const embed = new EmbedBuilder()
             .setImage('attachment://donation.png')
