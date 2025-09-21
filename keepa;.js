@@ -1,7 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const { createCanvas, loadImage, registerFont } = require('canvas');
-const fetch = require('node-fetch');
 const { Client, EmbedBuilder, AttachmentBuilder } = require('discord.js');
 
 const client = new Client({ intents: 3276799 });
