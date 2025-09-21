@@ -43,6 +43,43 @@ async function generateDonationCard(donator, receiver, amount) {
     return canvas.toBuffer();
 }
 
+app.post("/log", async (req, res) => {
+  try {
+    const { channelId, embeds } = req.body;
+    const channel = await client.channels.fetch(channelId);
+
+    if (!channel) return res.status(404).json({ error: "Channel not found" });
+
+    // Ensure embeds is always an array
+    const embedArray = Array.isArray(embeds) ? embeds : [embeds];
+
+    const builtEmbeds = embedArray.map(e => {
+      const embed = new EmbedBuilder()
+        .setTitle(e.title || "Log")
+        .setDescription(e.description || "")
+        .setColor(e.color ? parseInt(e.color) : 0x00bdff)
+        .setTimestamp();
+
+      if (Array.isArray(e.fields) && e.fields.length > 0) {
+        embed.addFields(e.fields);
+      }
+
+      if (e.footer) embed.setFooter(e.footer);
+      if (e.thumbnail) embed.setThumbnail(e.thumbnail);
+      if (e.image) embed.setImage(e.image);
+
+      return embed;
+    });
+
+    await channel.send({ embeds: builtEmbeds });
+
+    res.json({ status: "ok" });
+  } catch (err) {
+    console.error("Log failed:", err);
+    res.status(500).json({ error: "failed" });
+  }
+});
+
 app.post('/donation', async (req, res) => {
     try {
         const { donator, receiver, amount } = req.body;
@@ -55,7 +92,7 @@ app.post('/donation', async (req, res) => {
             .setDescription(`${donator.username} just donated ${amount.toLocaleString()} Robux to ${receiver.username}!`)
             .setImage('attachment://donation.png');
 
-        const channel = await client.channels.fetch('YOUR_CHANNEL_ID');
+        const channel = await client.channels.fetch('1273828770884620438');
         await channel.send({ embeds: [embed], files: [attachment] });
 
         res.json({ status: 'ok' });
