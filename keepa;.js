@@ -13,7 +13,7 @@ const fetch = require('node-fetch');
 async function loadRobloxAvatar(userId) {
     try {
         const apiUrl = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=420x420&format=Png&isCircular=false`;
-        const res = await fetch(apiUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+        const res = await fetch(apiUrl);
         const json = await res.json();
         const imageUrl = json.data?.[0]?.imageUrl;
         if (!imageUrl) throw new Error('No imageUrl found');
@@ -35,7 +35,7 @@ function getColorFromAmount(amount) {
     return '#00bdff';
 }
 
-// Generate donation card with perfectly centered Robux emoji
+// Generate donation card (avatars + circles + usernames + Robux amount + Robux emoji)
 async function generateDonationCard({ donator, receiver, amount, color, robuxEmojiUrl }) {
     const width = 1200;
     const height = 400;
@@ -56,7 +56,7 @@ async function generateDonationCard({ donator, receiver, amount, color, robuxEmo
     const donatorX = width * 0.15;
     const receiverX = width * 0.85;
 
-    // Draw avatars + colored borders
+    // Draw avatars + circular clip + border
     [[donatorAvatar, donatorX], [receiverAvatar, receiverX]].forEach(([avatar, x]) => {
         ctx.save();
         ctx.beginPath();
@@ -72,16 +72,29 @@ async function generateDonationCard({ donator, receiver, amount, color, robuxEmo
         ctx.stroke();
     });
 
-    // Draw Robux emoji perfectly centered
+    // Robux emoji in center
     if (robuxEmojiUrl) {
         try {
             const emojiImage = await loadImage(robuxEmojiUrl);
-            const emojiSize = 80; // size of emoji
-            ctx.drawImage(emojiImage, width / 2 - emojiSize / 2, avatarY - emojiSize / 2, emojiSize, emojiSize);
+            const emojiSize = 60;
+            ctx.drawImage(emojiImage, width / 2 - emojiSize / 2, avatarY - emojiSize / 2 - 10, emojiSize, emojiSize);
         } catch (err) {
             console.warn("Failed to load Robux emoji:", err.message);
         }
     }
+
+    // Draw Robux amount in bold
+    ctx.font = 'bold 60px sans-serif';
+    ctx.fillStyle = dynamicColor;
+    ctx.textAlign = 'center';
+    ctx.fillText(`R$ ${amount.toLocaleString()}`, width / 2, avatarY + 100);
+
+    // Draw usernames under avatars
+    ctx.font = '35px sans-serif';
+    ctx.fillStyle = '#FFFFFF';
+    ctx.textAlign = 'center';
+    ctx.fillText(`@${donator.username}`, donatorX, avatarY + circleRadius + 50);
+    ctx.fillText(`@${receiver.username}`, receiverX, avatarY + circleRadius + 50);
 
     return canvas.toBuffer('image/png');
 }
@@ -95,7 +108,6 @@ app.post("/log", async (req, res) => {
 
     if (!channel) return res.status(404).json({ error: "Channel not found" });
 
-    // Ensure embeds is always an array
     const embedArray = Array.isArray(embeds) ? embeds : [embeds];
 
     const builtEmbeds = embedArray.map(e => {
@@ -134,20 +146,19 @@ app.post('/donation', async (req, res) => {
 
         const robuxEmojiUrl = "https://cdn.discordapp.com/emojis/1206541048063459348.webp?size=96";
 
-        // Generate card image (without any text, only avatars + borders + Robux emoji)
         const buffer = await generateDonationCard({ donator, receiver, amount, color, robuxEmojiUrl });
         const attachment = new AttachmentBuilder(buffer, { name: 'donation.png' });
 
         const channel = await client.channels.fetch('1273828770884620438');
 
-        // Message content with emojis, usernames in backticks, bold Robux amount
         const robuxEmojiMessage = "<:robux:1206541048063459348>";
-        const content = `${emoji || ""} \`${donator.username}\` just donated ${robuxEmojiMessage} **R$ ${amount.toLocaleString()}** to \`${receiver.username}\`!`;
+        const content = `${emoji || ""} \`${donator.username}\` just donated ${robuxEmojiMessage}**${amount.toLocaleString()} Robux** to \`${receiver.username}\``;
 
-        // Send embed with only the image
         const embed = new EmbedBuilder()
             .setImage('attachment://donation.png')
-            .setColor(color ? parseInt(color.replace('#', ''), 16) : 0x00bdff);
+            .setColor(color ? parseInt(color.replace('#', ''), 16) : 0x00bdff)
+            .setFooter('Donated on')
+            .setTimestamp();
 
         await channel.send({ content, embeds: [embed], files: [attachment] });
 
