@@ -26,8 +26,12 @@ async function generateDonationCard(donator, receiver, amount) {
     ctx.fillRect(0, 0, width, height);
 
     // Download avatars
-    const donatorAvatar = await loadImage(`https://www.roblox.com/headshot-thumbnail/image?userId=${donator.id}&width=150&height=150&format=png`);
-    const receiverAvatar = await loadImage(`https://www.roblox.com/headshot-thumbnail/image?userId=${receiver.id}&width=150&height=150&format=png`);
+    const donatorAvatar = await loadImage(fetch(`https://www.roblox.com/headshot-thumbnail/image?userId=${donator.id}&width=150&height=150&format=png`, {
+    headers: { 'User-Agent': 'Mozilla/5.0' }
+}).then(res => res.buffer()));
+const receiverAvatar = await loadImage(fetch(`https://www.roblox.com/headshot-thumbnail/image?userId=${receiver.id}&width=150&height=150&format=png`, {
+    headers: { 'User-Agent': 'Mozilla/5.0' }
+}).then(res => res.buffer()));
     ctx.drawImage(donatorAvatar, 50, 75, 150, 150);
     ctx.drawImage(receiverAvatar, 600, 75, 150, 150);
 
