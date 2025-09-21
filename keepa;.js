@@ -10,8 +10,7 @@ const app = express();
 app.use(bodyParser.json());
 const fetch = require('node-fetch');
 
-registerFont('./fonts/NotoSans-Regular.ttf', { family: 'NotoSans' });
-registerFont('./fonts/NotoColorEmoji.ttf', { family: 'NotoEmoji' }); // optional if using emojis
+registerFont('./fonts/static/NotoSans-Regular.ttf', { family: 'NotoSans' });
 
 async function generateDonationCard({ donator, receiver, amount, color, robuxEmojiUrl }) {
     const width = 1200;
