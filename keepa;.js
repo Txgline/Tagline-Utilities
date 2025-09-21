@@ -11,50 +11,101 @@ const app = express();
 app.use(bodyParser.json());
 
 async function loadRobloxAvatar(userId) {
-    const url = `https://www.roblox.com/headshot-thumbnail/image?userId=${userId}&width=150&height=150&format=png`;
     try {
-        const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
-        if (!res.ok) throw new Error(`Failed to fetch avatar: ${res.status}`);
-        const buffer = await res.arrayBuffer();
+        // Fetch avatar headshot JSON
+        const apiUrl = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=420x420&format=Png&isCircular=false`;
+        const res = await fetch(apiUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+        if (!res.ok) throw new Error(`Failed to fetch avatar JSON: ${res.status}`);
+        
+        const json = await res.json();
+        const imageUrl = json.data?.[0]?.imageUrl;
+        if (!imageUrl) throw new Error('No imageUrl found in response');
+
+        // Fetch the actual image as buffer
+        const imageRes = await fetch(imageUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+        const buffer = await imageRes.arrayBuffer();
+
         return await loadImage(Buffer.from(buffer));
     } catch {
-        // Fallback image if Roblox headshot fails
-        return await loadImage('https://www.crusecom.com/wp-content/uploads/2016/12/ceocrusecom-com.jpeg');
+        // Fallback image if Roblox API fails
+        return await loadImage('https://i.imgur.com/0PqOKSA.png');
     }
 }
 
-async function generateDonationCard(donator, receiver, amount) {
-    const width = 800;
-    const height = 300;
+async function generateDonationCard({
+    donatorProfileId,
+    raiserProfileId,
+    donatorName,
+    raiserName,
+    robuxAmount,
+    primaryColor
+}) {
+    const width = 1200;
+    const height = 400;
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext('2d');
 
-    // Background color based on donation
-    let bgColor = '#00bdff';
-    if (amount >= 10000000) bgColor = '#FB0505';
-    else if (amount >= 1000000) bgColor = '#ff0064';
-    else if (amount >= 100000) bgColor = '#ff00e6';
-    else if (amount >= 10000) bgColor = '#00b3ff';
-    else if (amount >= 1) bgColor = '#08ff24';
-    ctx.fillStyle = bgColor;
+    // Sanitize color
+    const cleanColor = (primaryColor || 'FF00FF').replace('#', '');
+    const dynamicColor = `#${cleanColor}`;
+
+    // Background
+    ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, width, height);
 
-    // Load avatars with fallback
-    const donatorAvatar = await loadRobloxAvatar(donator.id);
-    const receiverAvatar = await loadRobloxAvatar(receiver.id);
-    ctx.drawImage(donatorAvatar, 50, 75, 150, 150);
-    ctx.drawImage(receiverAvatar, 600, 75, 150, 150);
+    // Load avatars
+    const donatorAvatar = await loadRobloxAvatar(donatorProfileId);
+    const raiserAvatar = await loadRobloxAvatar(raiserProfileId);
 
-    // Text
-    ctx.fillStyle = 'white';
-    ctx.font = 'bold 24px Arial';
-    ctx.fillText(`${donator.username} (${donator.displayName})`, 50, 50);
-    ctx.fillText(`${receiver.username} (${receiver.displayName})`, 600, 50);
+    const circleRadius = 100;
+    const avatarY = height / 2;
+    const donatorAvatarX = width * 0.15;
+    const raiserAvatarX = width * 0.85;
 
-    ctx.font = 'bold 32px Arial';
-    ctx.fillText(`donated ${amount.toLocaleString()} Robux`, 250, 160);
+    // Draw Donator Avatar in circle
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(donatorAvatarX, avatarY, circleRadius, 0, Math.PI * 2);
+    ctx.clip();
+    ctx.drawImage(donatorAvatar, donatorAvatarX - circleRadius, avatarY - circleRadius, circleRadius * 2, circleRadius * 2);
+    ctx.restore();
 
-    return canvas.toBuffer();
+    // Draw Raiser Avatar in circle
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(raiserAvatarX, avatarY, circleRadius, 0, Math.PI * 2);
+    ctx.clip();
+    ctx.drawImage(raiserAvatar, raiserAvatarX - circleRadius, avatarY - circleRadius, circleRadius * 2, circleRadius * 2);
+    ctx.restore();
+
+    // Draw circles around avatars
+    ctx.strokeStyle = dynamicColor;
+    ctx.lineWidth = 8;
+    ctx.beginPath();
+    ctx.arc(donatorAvatarX, avatarY, circleRadius + 4, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(raiserAvatarX, avatarY, circleRadius + 4, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Robux amount text
+    ctx.font = 'bold 80px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = dynamicColor;
+    ctx.fillText(`R$ ${robuxAmount.toLocaleString()}`, width / 2, height * 0.4);
+
+    // "donated to" text
+    ctx.font = '50px sans-serif';
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillText('donated to', width / 2, height * 0.55);
+
+    // Donator & Raiser names
+    ctx.font = '35px sans-serif';
+    ctx.fillText(`@${donatorName}`, donatorAvatarX, avatarY + circleRadius + 50);
+    ctx.fillText(`@${raiserName}`, raiserAvatarX, avatarY + circleRadius + 50);
+
+    return canvas.toBuffer('image/png');
 }
 
 module.exports = generateDonationCard;
