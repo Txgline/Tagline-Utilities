@@ -29,7 +29,7 @@ module.exports = {
         .setFooter({ text: "Tagline's Utilities" })
         .setTimestamp();
 
-      await interaction.reply({ embeds: [embed1, embed2], ephemeral: false });
+      await interaction.reply({ embeds: [embed2, embed1], ephemeral: false });
     } catch (err) {
       console.error(err);
       await interaction.reply({ content: '❌ Failed to send the rules.', ephemeral: true });
