@@ -9,9 +9,8 @@ module.exports = {
   async execute(interaction) {
     try {
       const embed2 = new EmbedBuilder()
-        .setImage('https://cdn.discordapp.com/attachments/1033478595596795995/1033506882163323022/rules.gif?ex=68d2760a&is=68d1248a&hm=24a635a78efcb28025dd0815035a8372df3e419589b0b5e03d5dde61846463a1&')
-        .setColor('#4b0082ff')
-
+      .setImage('https://cdn.discordapp.com/attachments/1033478595596795995/1033506882163323022/rules.gif?ex=68d2760a&is=68d1248a&hm=24a635a78efcb28025dd0815035a8372df3e419589b0b5e03d5dde61846463a1')
+        .setColor('#4b0082')
         const embed1 = new EmbedBuilder()
         .setDescription(`
 ● Show respect to other users and use common sense. If something isn’t listed here, it doesn’t mean it’s allowed.
