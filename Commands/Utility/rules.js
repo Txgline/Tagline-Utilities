@@ -25,7 +25,7 @@ module.exports = {
 ● Game Rules – No duping, leaderboard-boosting, or scamming other players.
 ● All members must follow and agree to [Discord's TOS](https://discord.com/terms) and [Discord Community Guidelines](https://discord.com/guidelines).
         `)
-        .setColor('#1f0047ff')
+        .setColor('#4b0082')
         .setFooter({ text: "Tagline's Utilities" })
         .setTimestamp();
 
