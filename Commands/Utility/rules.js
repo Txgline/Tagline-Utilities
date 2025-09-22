@@ -10,7 +10,7 @@ module.exports = {
     try {
       const embed2 = new EmbedBuilder()
         .setImage('https://cdn.discordapp.com/attachments/1033478595596795995/1033506882163323022/rules.gif?ex=68d2760a&is=68d1248a&hm=24a635a78efcb28025dd0815035a8372df3e419589b0b5e03d5dde61846463a1')
-        .setColor('#4b0082');
+        .setColor('#2e184b');
 
       const embed1 = new EmbedBuilder()
         .setDescription(`
@@ -26,7 +26,7 @@ module.exports = {
 ● Game Rules – No duping, leaderboard-boosting, or scamming other players.\n
 ● All members must follow and agree to [Discord's TOS](https://discord.com/terms) and [Discord Community Guidelines](https://discord.com/guidelines).
         `)
-        .setColor('#4b0082')
+        .setColor('#2e184b')
         .setFooter({ text: "Tagline's Utilities" })
         .setTimestamp();
 
