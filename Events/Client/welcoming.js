@@ -4,6 +4,7 @@ module.exports = {
   name: "guildMemberAdd",
   async execute(member) {
     const welcomeChannelId = "1303626641653628949";
+    const autoRoleId = "1399511481590087803";
 
     if (!welcomeChannelId || welcomeChannelId.trim() === "") {
       console.log("Welcome system is not configured. Skipping welcome event.");
@@ -18,7 +19,13 @@ module.exports = {
     }
 
     try {
-      // Public welcome message in server channel
+      const role = member.guild.roles.cache.get(autoRoleId);
+      if (role) {
+        await member.roles.add(role);
+        console.log(`Assigned role ${role.name} to ${member.user.tag}`);
+      } else {
+        console.error(`Role with ID ${autoRoleId} does not exist.`);
+      }
       await channel.send({
         embeds: [
           new EmbedBuilder()
