@@ -46,20 +46,20 @@ module.exports = {
       }
 
       if (pollOptions.length < 2) {
-        return interaction.reply({ content: '❌ You must provide at least 2 options.', ephemeral: true });
+        return interaction.reply({
+          content: '❌ You must provide at least 2 options.',
+          flags: 64, // ephemeral
+        });
       }
 
       const description = pollOptions.map((opt, i) => `${numberEmojis[i]} ${opt}`).join('\n');
 
-      const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#800080', '#008000', '#FFC0CB'];
-const randomColor = colors[Math.floor(Math.random() * colors.length)];
-
-const embed = new EmbedBuilder()
-  .setTitle(`📊 ${question}`)
-  .setDescription(description)
-  .setColor(randomColor) // <-- use the random color here
-  .setFooter({ text: `Poll created by ${interaction.user.tag}` })
-  .setTimestamp();
+      const embed = new EmbedBuilder()
+        .setTitle(`📊 ${question}`)
+        .setDescription(description)
+        .setColor('Random')
+        .setFooter({ text: `Poll created by ${interaction.user.tag}` })
+        .setTimestamp();
 
       const pollMsg = await channel.send({ embeds: [embed] });
 
@@ -67,7 +67,10 @@ const embed = new EmbedBuilder()
         await pollMsg.react(numberEmojis[i]);
       }
 
-      await interaction.reply({ content: `✅ Poll created successfully!\n🆔 Message ID: \`${pollMsg.id}\``, ephemeral: true });
+      await interaction.reply({
+        content: `✅ Poll created successfully!\n🆔 Message ID: \`${pollMsg.id}\``,
+        flags: 64, // ephemeral
+      });
 
     } else if (subcommand === 'show') {
       const messageId = options.getString('message_id');
@@ -78,14 +81,24 @@ const embed = new EmbedBuilder()
           pollMessage = await channel.messages.fetch(messageId);
         } else {
           const messages = await channel.messages.fetch({ limit: 50 });
-          pollMessage = messages.find(m => m.author.id === interaction.client.user.id && m.embeds.length > 0 && m.embeds[0].title?.startsWith('📊'));
+          pollMessage = messages.find(
+            m => m.author.id === interaction.client.user.id &&
+            m.embeds.length > 0 &&
+            m.embeds[0].title?.startsWith('📊')
+          );
         }
       } catch (err) {
-        return interaction.reply({ content: '❌ Could not fetch the message. Make sure the message ID is valid and in this channel.', ephemeral: true });
+        return interaction.reply({
+          content: '❌ Could not fetch the message. Make sure the message ID is valid and in this channel.',
+          flags: 64, // ephemeral
+        });
       }
 
       if (!pollMessage || pollMessage.author.id !== interaction.client.user.id || !pollMessage.embeds.length || !pollMessage.embeds[0].title?.startsWith('📊')) {
-        return interaction.reply({ content: '❌ No valid poll found.', ephemeral: true });
+        return interaction.reply({
+          content: '❌ No valid poll found.',
+          flags: 64, // ephemeral
+        });
       }
 
       const embed = pollMessage.embeds[0];
@@ -101,7 +114,10 @@ const embed = new EmbedBuilder()
       const sorted = reactionData.sort((a, b) => b.count - a.count);
 
       if (sorted.length === 0) {
-        return interaction.reply({ content: '❌ No votes found on the selected poll.', ephemeral: true });
+        return interaction.reply({
+          content: '❌ No votes found on the selected poll.',
+          flags: 64, // ephemeral
+        });
       }
 
       const resultEmbed = new EmbedBuilder()
