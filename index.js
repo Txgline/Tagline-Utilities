@@ -15,11 +15,43 @@ client.commands = new Collection();
   require(`./Handlers/${handler}`)(client)
 );
 
+client.on(Events.MessageReactionAdd, async (reaction, user) => {
+  if (user.bot) return;
+
+  const { message, emoji } = reaction;
+  const guild = message.guild;
+  const member = await guild.members.fetch(user.id);
+
+  // Example: match emoji → role ID
+  if (emoji.name === '👍') {
+    await member.roles.add('1417860529761943601');
+  }
+  if (emoji.name === '🔥') {
+    await member.roles.add('1417860529761943600');
+  }
+  if (emoji.name === '🎮') {
+    await member.roles.add('1417860529761943598');
+  }
+});
+
+client.on(Events.MessageReactionRemove, async (reaction, user) => {
+  if (user.bot) return;
+
+  const { message, emoji } = reaction;
+  const guild = message.guild;
+  const member = await guild.members.fetch(user.id);
+
+  if (emoji.name === '👍') {
+    await member.roles.remove('ROLE_ID_MEMBER');
+  }
+  if (emoji.name === '🔥') {
+    await member.roles.remove('ROLE_ID_VIP');
+  }
+  if (emoji.name === '🎮') {
+    await member.roles.remove('ROLE_ID_GAMER');
+  }
+});
+
 client.roleAssignmentIntervals = new Map();
 
-// Use token from .env
 client.login(process.env.TOKEN);
-
-/**
-Made By PHV#3071
-*/
