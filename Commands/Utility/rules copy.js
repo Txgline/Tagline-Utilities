@@ -31,7 +31,7 @@ If you think you meet one of the requirements above, please create a support tic
 
          const embed5 = new EmbedBuilder()
       .setTitle('How do I get/remove the "__ Donated" role?')
-        .setDescription(`If you have more than <:rb:1206541048063459348>10K Robux donated in "PLS DONATE Z" or "Earn and Donate", you can get roles that showcase a milestone you've reached for donating. (10k, 100k, 1M, and 10M)\n
+        .setDescription(`If you have more than <:robux:1420083740419559434>10K Robux donated in "PLS DONATE Z" or "Earn and Donate", you can get roles that showcase a milestone you've reached for donating. (10k, 100k, 1M, and 10M)\n
 To get your role, all you need to do is send a picture of your ratio ingame in <#1420074205088710718> and one of the <@&1417860529761943602> will give you the role.`)
         .setColor('#190e4e')
 
@@ -51,7 +51,7 @@ To get your role, all you need to do is send a picture of your ratio ingame in <
         },
         {
           name: "In-Game",
-          value: "● <:rb:1206541048063459348>100K Fake Robux in **PLS DONATE Z**.\n● Booster Hammer in both games.\n● Chat Tag in both games.",
+          value: "● <:robux:1420083740419559434>100K Fake Robux in **PLS DONATE Z**.\n● Booster Hammer in both games.\n● Chat Tag in both games.",
           inline: false
         }
       )
