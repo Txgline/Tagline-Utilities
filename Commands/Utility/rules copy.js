@@ -89,8 +89,11 @@ To get your role, all you need to do is send a picture of your ratio ingame in <
         .setFooter({ text: "Tagline's Utilities" })
         .setTimestamp();
 
-      await interaction.channel.send({ embeds: [embed2, embed1, embed3, embed4, embed5, embed6, embed7. embed8, embed9. embed10] });
-await interaction.reply({ content: '✅ Faq sent!', ephemeral: true });
+      await interaction.channel.send({ embeds: [embed2, embed1, embed3, embed4, embed5, embed6, embed7, embed8, embed9, embed10] });
+await interaction.reply({
+  content: '✅ FAQ sent!',
+  flags: 64 // makes it ephemeral
+});
     } catch (err) {
       console.error(err);
       await interaction.reply({ content: '❌ Failed to send the Faq.', ephemeral: true });
