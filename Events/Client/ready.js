@@ -10,7 +10,7 @@ module.exports = {
       activities: [
         {
           name: "Tagline Club | dsc.gg/txgclub",
-          type: ActivityType.Streaming, // ✅ Updated for v14
+          type: ActivityType.Watching, // ✅ Updated for v14
           url: "https://www.twitch.tv/txgline", // Must be a valid Twitch/YouTube link
         },
       ],
