@@ -51,12 +51,15 @@ module.exports = {
 
       const description = pollOptions.map((opt, i) => `${numberEmojis[i]} ${opt}`).join('\n');
 
-      const embed = new EmbedBuilder()
-        .setTitle(`📊 ${question}`)
-        .setDescription(description)
-        .setColor('Random')
-        .setFooter({ text: `Poll created by ${interaction.user.tag}` })
-        .setTimestamp();
+      const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#800080', '#008000', '#FFC0CB'];
+const randomColor = colors[Math.floor(Math.random() * colors.length)];
+
+const embed = new EmbedBuilder()
+  .setTitle(`📊 ${question}`)
+  .setDescription(description)
+  .setColor(randomColor) // <-- use the random color here
+  .setFooter({ text: `Poll created by ${interaction.user.tag}` })
+  .setTimestamp();
 
       const pollMsg = await channel.send({ embeds: [embed] });
 
@@ -111,12 +114,3 @@ module.exports = {
     }
   }
 };
-
-
-/**
- * @INFO
- * Made BY PHV#3071
- * Discord Support Server: https://discord.gg/mtGUKAuRMT
- * YouTube: https://www.youtube.com/@phvdev04/videos
- * Don't steal credits or else instant copyright.
- */
