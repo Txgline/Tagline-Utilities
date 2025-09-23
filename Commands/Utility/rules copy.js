@@ -46,7 +46,7 @@ To get your role, all you need to do is send a picture of your ratio ingame in <
       .addFields(
         {
           name: "Discord",
-          value: "● change their server nickname.\n● use external emojis & stickers.\n● access an exclusive channel.",
+          value: "● Change their server nickname.\n● Use external emojis & stickers.\n● Access an exclusive channel.",
           inline: false
         },
         {
@@ -69,7 +69,7 @@ To get your role, all you need to do is send a picture of your ratio ingame in <
 
         const embed10 = new EmbedBuilder()
       .setTitle('What should I do if I find bugs in-Game?')
-      .setDescription("report it in <#1417860531263508534> specify the bug you're reporting, how to trigger it and a picture or video showing off the bug.")
+      .setDescription("Report it in <#1417860531263508534> specify the bug you're reporting, how to trigger it and a picture or video showing off the bug.")
         .setColor('#190e4e')
         .setFooter({ text: "Tagline's Utilities" })
         .setTimestamp();
