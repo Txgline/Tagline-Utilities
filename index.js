@@ -1,18 +1,10 @@
 require('dotenv').config();
 
-
 const { Client, GatewayIntentBits, Partials, Collection } = require("discord.js");
 
 const fs = require('fs');
 const path = require('path');
 const keepalive = require('./keepa;')
-const { Events } = require('discord.js');
-
-client.commands = new Collection();
-
-['commandHandler', 'eventHandler'].forEach(handler =>
-  require(`./Handlers/${handler}`)(client)
-);
 
 const client = new Client({
   intents: [
@@ -29,8 +21,13 @@ const client = new Client({
   ],
 });
 
-module.exports = client;
+client.commands = new Collection();
 
+['commandHandler', 'eventHandler'].forEach(handler =>
+  require(`./Handlers/${handler}`)(client)
+);
+
+client.roleAssignmentIntervals = new Map();
 
 client.on('messageReactionAdd', async (reaction, user) => {
   if (user.bot) return;
@@ -67,6 +64,6 @@ client.on('messageReactionRemove', async (reaction, user) => {
 });
 */
 
-client.roleAssignmentIntervals = new Map();
-
 client.login(process.env.TOKEN);
+
+module.exports = client;
