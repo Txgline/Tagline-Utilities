@@ -10,12 +10,12 @@ module.exports = {
     const embed = new EmbedBuilder()
       .setTitle('Reaction Roles')
       .setDescription(`
-📢 Announcement Pings - Be the first to know about important news and updates.
-🎲 Random Pings - Get notified for fun and unexpected announcements.
-🥀 Chat Reviver - Get pinged when it's time to bring the chat back to life.
-🤣 Hall of Shame - Stay updated on funny or embarrassing moments.
-🛠️ Update Pings - Don't miss out on new features, fixes, or improvements.
-🎉 Giveaway Pings - Be alerted whenever a giveaway starts!
+📢 **Announcement Pings** - Be the first to know about important news and updates.
+🎲 **Random Pings** - Get notified for fun and unexpected announcements.
+🥀 **Chat Reviver** - Get pinged when it's time to bring the chat back to life.
+🤣 **Hall of Shame** - Stay updated on funny or embarrassing moments.
+🛠️ **Update Pings** - Don't miss out on new features, fixes, or improvements.
+🎉 **Giveaway Pings** - Be alerted whenever a giveaway starts!
 Click the Reaction to Get the Role.
 `)
       .setColor('#190e4e');
