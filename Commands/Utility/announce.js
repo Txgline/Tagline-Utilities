@@ -1,22 +1,12 @@
-const { SlashCommandBuilder, ChannelType, PermissionFlagsBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('announce')
-    .setDescription('Send a fully customizable announcement with dynamic fields')
-    // REQUIRED options
-    .addChannelOption(option =>
-      option.setName('channel')
-        .setDescription('The channel to send the announcement in')
-        .setRequired(true)
-        .addChannelTypes(ChannelType.GuildText)
-    )
-    .addStringOption(option =>
-      option.setName('description')
-        .setDescription('Description of the embed')
-        .setRequired(true)
-    )
+    .setDescription('Send a fully customizable announcement or plain text')
     // OPTIONAL options
+    .addStringOption(option => option.setName('text').setDescription('Send plain text instead of an embed').setRequired(false))
+    .addStringOption(option => option.setName('description').setDescription('Description of the embed').setRequired(false))
     .addStringOption(option => option.setName('title').setDescription('Title of the embed').setRequired(false))
     .addStringOption(option => option.setName('color').setDescription('Color of the embed (hex, name, decimal)').setRequired(false))
     .addStringOption(option => option.setName('footer').setDescription('Footer text').setRequired(false))
@@ -31,7 +21,8 @@ module.exports = {
 
   async execute(interaction) {
     try {
-      const channel = interaction.options.getChannel('channel');
+      const channel = interaction.channel; // always send in current channel
+      const text = interaction.options.getString('text');
       const description = interaction.options.getString('description');
       const title = interaction.options.getString('title');
       const color = interaction.options.getString('color') || '#190e4e';
@@ -39,13 +30,21 @@ module.exports = {
       const image = interaction.options.getString('image');
       const thumbnail = interaction.options.getString('thumbnail');
       const author = interaction.options.getString('author');
-      const fieldsInput = interaction.options.getString('fields'); // dynamic fields
+      const fieldsInput = interaction.options.getString('fields');
       const role = interaction.options.getRole('mention');
       const buttonLabel = interaction.options.getString('button_label');
       const buttonUrl = interaction.options.getString('button_url');
 
+      // If plain text is provided, send it instead of an embed
+      if (text && text.trim() !== '') {
+        const content = role ? `${role} ${text}` : text;
+        await channel.send({ content });
+        return interaction.reply({ content: `✅ Text announcement sent in ${channel}`, ephemeral: true });
+      }
+
+      // Otherwise, send embed
       if (!description || description.trim() === '') {
-        return interaction.reply({ content: '❌ Description cannot be empty.', ephemeral: true });
+        return interaction.reply({ content: '❌ Description cannot be empty for an embed.', ephemeral: true });
       }
 
       const embed = new EmbedBuilder()
@@ -59,9 +58,8 @@ module.exports = {
       if (thumbnail) embed.setThumbnail(thumbnail);
       if (author) embed.setAuthor({ name: author });
 
-      // Dynamic fields
       if (fieldsInput) {
-        const fields = fieldsInput.split('|'); // split by '|'
+        const fields = fieldsInput.split('|');
         for (const f of fields) {
           const [name, value] = f.split(':');
           if (name && value) embed.addFields({ name: name.trim(), value: value.trim(), inline: true });
@@ -71,17 +69,13 @@ module.exports = {
       let row;
       if (buttonLabel && buttonUrl) {
         row = new ActionRowBuilder().addComponents(
-          new ButtonBuilder()
-            .setLabel(buttonLabel)
-            .setStyle(ButtonStyle.Link)
-            .setURL(buttonUrl)
+          new ButtonBuilder().setLabel(buttonLabel).setStyle(ButtonStyle.Link).setURL(buttonUrl)
         );
       }
 
       const content = role ? `${role}` : null;
-
       await channel.send({ content, embeds: [embed], components: row ? [row] : [] });
-      await interaction.reply({ content: `✅ Announcement sent in ${channel}`, ephemeral: true });
+      await interaction.reply({ content: `✅ Embed announcement sent in ${channel}`, ephemeral: true });
 
     } catch (err) {
       console.error(err);
