@@ -1,9 +1,7 @@
 require('dotenv').config();
 
-const { Client, Collection } = require('discord.js');
-const client = new Client({
-  intents: 3276799 
-});
+
+const { Client, GatewayIntentBits, Partials, Collection } = require("discord.js");
 
 const fs = require('fs');
 const path = require('path');
@@ -15,8 +13,6 @@ client.commands = new Collection();
 ['commandHandler', 'eventHandler'].forEach(handler =>
   require(`./Handlers/${handler}`)(client)
 );
-
-const { Client, GatewayIntentBits, Partials } = require("discord.js");
 
 const client = new Client({
   intents: [
