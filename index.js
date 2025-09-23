@@ -8,6 +8,7 @@ const client = new Client({
 const fs = require('fs');
 const path = require('path');
 const keepalive = require('./keepa;')
+const { Events } = require('discord.js');
 
 client.commands = new Collection();
 
