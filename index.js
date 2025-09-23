@@ -23,18 +23,27 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
   const guild = message.guild;
   const member = await guild.members.fetch(user.id);
 
-  // Example: match emoji → role ID
-  if (emoji.name === '👍') {
-    await member.roles.add('1417860529761943601');
+  if (emoji.name === '📢') {
+    await member.roles.add('1417860529724198994');
   }
-  if (emoji.name === '🔥') {
-    await member.roles.add('1417860529761943600');
+  if (emoji.name === '🎲') {
+    await member.roles.add('1417860529724198995');
   }
-  if (emoji.name === '🎮') {
-    await member.roles.add('1417860529761943598');
+  if (emoji.name === '🥀') {
+    await member.roles.add('1417860529724198993');
   }
-});
+  if (emoji.name === '🤣') {
+    await member.roles.add('1420095235337228310');
+  }
+  if (emoji.name === '🛠️') {
+    await member.roles.add('1420095492179628193');
+  }
+  if (emoji.name === '🎉') {
+    await member.roles.add('1417860529724198992');
+  }
 
+});
+/*
 client.on(Events.MessageReactionRemove, async (reaction, user) => {
   if (user.bot) return;
 
@@ -52,6 +61,7 @@ client.on(Events.MessageReactionRemove, async (reaction, user) => {
     await member.roles.remove('ROLE_ID_GAMER');
   }
 });
+*/
 
 client.roleAssignmentIntervals = new Map();
 
