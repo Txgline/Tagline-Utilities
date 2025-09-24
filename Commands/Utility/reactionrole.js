@@ -19,7 +19,7 @@ module.exports = {
 Click the Reaction to Get the Role.
 `)
       .setColor('#190e4e')
-      .setFooter("Tagline's Utilities")
+      .setFooter({ text: "Tagline's Utilities" })
       .setTimestamp();
 
     const message = await interaction.channel.send({ embeds: [embed] });
