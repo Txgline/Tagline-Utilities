@@ -18,7 +18,9 @@ module.exports = {
 🎉 **Giveaway Pings** - Be alerted whenever a giveaway starts!
 Click the Reaction to Get the Role.
 `)
-      .setColor('#190e4e');
+      .setColor('#190e4e')
+      .setFooter("Tagline's Utilities")
+      .setTimestamp();
 
     const message = await interaction.channel.send({ embeds: [embed] });
 
