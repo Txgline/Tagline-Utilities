@@ -45,7 +45,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
   if (emoji.name === '🛠️') await member.roles.add('1420095492179628193');
   if (emoji.name === '🎉') await member.roles.add('1417860529724198992');
 });
-/*
+
 client.on('messageReactionRemove', async (reaction, user) => {
   if (user.bot) return;
 
@@ -62,7 +62,6 @@ client.on('messageReactionRemove', async (reaction, user) => {
   if (emoji.name === '🛠️') await member.roles.remove('1420095492179628193');
   if (emoji.name === '🎉') await member.roles.remove('1417860529724198992');
 });
-*/
 
 client.login(process.env.TOKEN);
 
