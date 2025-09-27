@@ -25,8 +25,8 @@ If you think you meet one of the requirements above, please create a support tic
         .setColor('#190e4e')
 
         const embed4 = new EmbedBuilder()
-      .setTitle('How do I get roles?')
-        .setDescription(`You can head over to ⁠<#1417860530596479092> to give yourself roles depending on your interests and what you'd like to be pinged for.`)
+      .setTitle('How do I get/remove roles?')
+        .setDescription(`You can visit ⁠<#1417860530596479092> or <id:customize> to choose roles based on your interests and what notifications you’d like to receive.`)
         .setColor('#190e4e')
 
          const embed5 = new EmbedBuilder()
