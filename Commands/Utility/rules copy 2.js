@@ -15,8 +15,9 @@ module.exports = {
         const embed10 = new EmbedBuilder()
       .setDescription(`<:robuxbag:1421752726357938266> [Earn and Donate](https://www.roblox.com/games/100747960449802/Earn-and-Donate)\n
 <:robuxs:1421753470272147586> [PLS DONATE Z](https://www.roblox.com/games/129672063958972/PLS-DONATE-Z)\n
- <:taglineclub:1421754443128639509> [Tagline Club Roblox Group!](https://www.roblox.com/communities/17015122/Tagline-Club#!/about)\n
+ <:taglineclub:1421754443128639509> [Tagline Club Roblox Group](https://www.roblox.com/communities/17015122/Tagline-Club#!/about)\n
 <:FakeNitroEmoji:1421753852331298836> [Twitter](https://x.com/txgline)\n
+<:youtube:1421777263887777822> [YouTube](https://www.youtube.com/@txglines)
         `)
         .setColor('#190e4e')
         .setFooter({ text: "Tagline's Utilities" })
