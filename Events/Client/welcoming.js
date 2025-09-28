@@ -43,7 +43,7 @@ module.exports = {
           `Hi ${member}!\n\n` +
           `→ <:kool:1300228217243832423> We’re happy to have you here! Here’s a quick guide to get started:\n\n` +
                   `→ <:begger:1280208774908612774> **Read the Rules:**\nCheck out <#1417860530596479089> to keep the community safe and enjoyable for everyone.\n\n` +
-                  `→ <:pijamafrog:1126508357914742864> **Explore the Roles:**\nVisit <#1113354226115018776> to learn what each role does and find one that fits you!\n\n` +
+                  `→ <:pijamafrog:1126508357914742864> **Explore the Roles:**\nVisit <#1417860530596479092> to learn what each role does and find one that fits you!\n\n` +
                   `→ <:coolsmile:1280053756163129364> **Say Hello:**\nDrop a friendly message in <#1417860531397591195> and meet new people!`,
         )
         .setImage("https://i.imgur.com/xUirQtU.jpeg")
