@@ -9,7 +9,7 @@ module.exports = {
   async execute(interaction) {
     try {
       const embed2 = new EmbedBuilder()
-        .setImage('media.discordapp.net/attachments/1362182753537491054/1391907523342237706/Socials.gif?ex=68d9b565&is=68d863e5&hm=7da74d120c61db6a7928ff6e4c4d415c46e880508e44cd75fd2f32596ee45e83')
+        .setImage('https://media.discordapp.net/attachments/1362182753537491054/1391907523342237706/Socials.gif?ex=68d9b565&is=68d863e5&hm=7da74d120c61db6a7928ff6e4c4d415c46e880508e44cd75fd2f32596ee45e83')
         .setColor('#190e4e');
 
         const embed10 = new EmbedBuilder()
@@ -29,7 +29,10 @@ await interaction.reply({
 });
     } catch (err) {
       console.error(err);
-      await interaction.reply({ content: '❌ Failed to send the Social.', ephemeral: true });
+      await interaction.reply({
+  content: '❌ Failed to send the Social.',
+  flags: 64 // makes it ephemeral
+});
     }
   },
 };
